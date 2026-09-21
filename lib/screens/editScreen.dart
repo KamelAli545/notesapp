@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notesapp/dataBaseHelper.dart';
 import 'package:notesapp/noteModel.dart';
+import 'package:notesapp/notes_cubit.dart';
 
 class Editscreen extends StatefulWidget {
   final NoteModel? note;
@@ -46,18 +48,18 @@ class _EditscreenState extends State<Editscreen> {
             child: Row(
               children: [
                 if (isEditing)
-                  FilledButton(
+                  IconButton(
                     onPressed: () async {
-                      await DatabaseHelper.deleteNote(widget.note!.id!);
+                      final cubit = context.read<NotesCubit>();
+                      await cubit.deleteNotes({widget.note!.id!});
                       if (!mounted) return;
-                      Navigator.pop(context, true);
+                      Navigator.pop(context);
                     },
-                    style: FilledButton.styleFrom(
-                        backgroundColor: Colors.transparent),
-                    child: Icon(Icons.delete, color: Colors.black),
+                    icon: Icon(Icons.delete_outline, color: Color(0xFF1B2333)),
                   ),
                 FilledButton(
                   onPressed: () async {
+                    final cubit = context.read<NotesCubit>();
                     final title = titleController.text.trim();
                     final body = bodyController.text.trim();
                     if (title.isEmpty && body.isEmpty) {
@@ -65,34 +67,21 @@ class _EditscreenState extends State<Editscreen> {
                       return;
                     }
 
-                    if (isEditing) {
-                      await DatabaseHelper.updateToNote(
-                        NoteModel(
-                          widget.note!.id,
-                          title.isEmpty ? 'Untitled' : title,
-                          body,
-                        ),
-                      );
-                    } else {
-                      await DatabaseHelper.insertNote(
-                        NoteModel(
-                          null,
-                          title.isEmpty ? 'Untitled' : title,
-                          body,
-                        ),
-                      );
-                    }
+                    final finalTitle = title.isEmpty ? 'Untitled' : title;
 
+                    if (isEditing) {
+                      await cubit.updateNote(NoteModel(widget.note!.id, finalTitle, body));
+                    } else {
+                      await cubit.addNote(NoteModel(null, finalTitle, body));
+                    }
                     if (!mounted) return;
-                    Navigator.pop(context, true);
+                    Navigator.pop(context);
                   },
-                  style: FilledButton.styleFrom(
-                      backgroundColor: Color(0xFF1B2333)),
+                  style: FilledButton.styleFrom(backgroundColor: Color(0xFF1B2333)),
                   child: Text("Save"),
                 ),
               ],
-            ),
-          )
+            ),          )
         ],
       ),
       body: Padding(

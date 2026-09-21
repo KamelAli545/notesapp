@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:notesapp/dataBaseHelper.dart';
 import 'package:notesapp/noteModel.dart';
+import 'package:notesapp/notes_cubit.dart';
 import 'package:notesapp/screens/editScreen.dart';
 import 'package:notesapp/screens/widgets/NoteCard.dart';
 
@@ -43,7 +45,7 @@ class _HomescreenState extends State<Homescreen> {
     searchController.dispose();
     super.dispose();
   }
-  List<NoteModel> get filteredNotes {
+  List<NoteModel> _filter(List<NoteModel> notes) {
     if (searchQuery.isEmpty) return notes;
     return notes.where((note) {
       return note.title.toLowerCase().contains(searchQuery) ||
@@ -72,22 +74,19 @@ class _HomescreenState extends State<Homescreen> {
       selectedIds = {};
     });
   }
-  Future<void> _deleteSelected() async {
-    await Future.wait(
-      selectedIds.map((id) => DatabaseHelper.deleteNote(id)),
-    );
+  void _deleteSelected() {
+    context.read<NotesCubit>().deleteNotes(selectedIds);
     _cancelSelection();
-    loadNotes();
   }
-
   @override
   Widget build(BuildContext context) {
     List<Widget> left = [];
     List<Widget> right = [];
-    final list = filteredNotes;
+    final state = context.watch<NotesCubit>().state;
+    final notes = state is NotesSuccess ? state.notes : <NoteModel>[];
+    final list = _filter(notes);
 
-
-    for (int i = 0; i < notes.length; i++) {
+    for (int i = 0; i < list.length; i++) {
       final note = list[i];
       final id = note.id!;
       final selected = selectedIds.contains(id);
@@ -96,16 +95,15 @@ class _HomescreenState extends State<Homescreen> {
         child: Notecard(
         note: note,
         isSelected: selected,
-        onTap: () async{
+        onTap: () {
           if(isSelecting){
             _toggleSelection(id);
             return;
           }
-          final changed=await Navigator.push(
+          Navigator.push(
             context, MaterialPageRoute(
               builder: (_)=>Editscreen(note:note)),
           );
-          if(changed==true) loadNotes();
         },
         onLongPress: () async{
           if (!isSelecting) {
@@ -130,7 +128,6 @@ class _HomescreenState extends State<Homescreen> {
             await Navigator.push(
                 context, MaterialPageRoute
               (builder: (_)=>Editscreen()));
-            loadNotes();
           },
       backgroundColor: Color(0xFF1B2333),
         foregroundColor: Colors.white,
@@ -221,14 +218,17 @@ class _HomescreenState extends State<Homescreen> {
                   ),
                 SizedBox(height: 30),
                 Expanded(
-                   child: list.isEmpty && searchQuery.isNotEmpty
-                    ? Center(
-                      child: Text(
-                         "No notes found",
-                         style: TextStyle(color: Color(0xFF6B7385)),
-                        ),
-                       )
-        : SingleChildScrollView(
+                   child: state is NotesLoading?
+    Center(child: CircularProgressIndicator(),
+    )
+        : state is NotesError?
+    Center(child: Text(state.message),):
+    (list.isEmpty&& searchQuery.isNotEmpty)?
+        Center(child: Text("No notes found",
+        style: TextStyle(color: Color(0xFF6B7385)),
+        ),
+        ):
+                   SingleChildScrollView(
                     padding: EdgeInsets.only(bottom: 96),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
