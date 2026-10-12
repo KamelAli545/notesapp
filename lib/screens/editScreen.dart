@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:notesapp/dataBaseHelper.dart';
+import 'package:notesapp/cubit/notes_cubit.dart';
 import 'package:notesapp/noteModel.dart';
-import 'package:notesapp/notes_cubit.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Editscreen extends StatefulWidget {
   final NoteModel? note;
@@ -68,17 +68,21 @@ class _EditscreenState extends State<Editscreen> {
                     }
 
                     final finalTitle = title.isEmpty ? 'Untitled' : title;
-
+                    final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
                     if (isEditing) {
-                      await cubit.updateNote(NoteModel(widget.note!.id, finalTitle, body));
+                      await cubit.updateNote(NoteModel(widget.note!.id, finalTitle, body,uid));
                     } else {
-                      await cubit.addNote(NoteModel(null, finalTitle, body));
+                      await cubit.addNote(NoteModel(null, finalTitle, body,uid));
                     }
                     if (!mounted) return;
                     Navigator.pop(context);
                   },
-                  style: FilledButton.styleFrom(backgroundColor: Color(0xFF1B2333)),
-                  child: Text("Save"),
+                  style: FilledButton.styleFrom(backgroundColor: Colors.purple),
+                  child: Text("Save",
+                  style: TextStyle(
+                    color: Colors.white
+                  ),
+                  ),
                 ),
               ],
             ),          )

@@ -12,7 +12,7 @@ class Notecard extends StatelessWidget {
   final NoteModel note;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
-  final isSelected ;
+  final bool isSelected ;
 
   const Notecard({super.key,
     required this.onTap,
@@ -62,9 +62,7 @@ class Notecard extends StatelessWidget {
 
                   )
                 ],
-
               ),
-
             ),
         ]
           ),

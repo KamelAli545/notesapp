@@ -1,16 +1,17 @@
 import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:notesapp/dataBaseHelper.dart';
 import 'package:notesapp/noteModel.dart';
 
 part 'notes_state.dart';
 
 class NotesCubit extends Cubit<NotesState> {
+  String get _uid => FirebaseAuth.instance.currentUser?.uid ?? '';
   NotesCubit() : super(NotesInitial());
   Future<void> loadNotes() async {
     emit(NotesLoading());
     try {
-      final notes = await DatabaseHelper.getNote();
+      final notes = await DatabaseHelper.getNote(_uid);
       emit(NotesSuccess(notes));
     } catch (e) {
       emit(NotesError(e.toString()));

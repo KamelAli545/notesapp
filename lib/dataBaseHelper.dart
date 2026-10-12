@@ -13,24 +13,35 @@ class DatabaseHelper {
   }
   static Future<Database> _initDatabase()async {
     final path = join(await getDatabasesPath(), "notes.db");
-    return await openDatabase(path, version: 1, onCreate: (db, version) async {
+    return await openDatabase(
+        path, version: 2, onCreate: (db, version) async {
       await db.execute('''
       CREATE TABLE notes(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT,
-      description TEXT
+      description TEXT,
+      userId TEXT
       )
           '''
       );
-    });
+    },
+onUpgrade: (db, oldVersion, newVersion) async {
+  if (oldVersion < 2) {
+    await db.execute('ALTER TABLE notes ADD COLUMN userId TEXT');
+  }
+},
+    );
   }
   static Future<int>insertNote(NoteModel note)async{
     final db=await database;
     return await db.insert("notes", note.toMap());
   }
-  static Future<List<NoteModel>>getNote()async{
+  static Future<List<NoteModel>>getNote(String userId)async{
     final db=await database;
-    final result=await db.query("notes");
+    final result=await db.query("notes",
+    where: 'userId=?',
+      whereArgs: [userId],
+    );
     return result.map((map)=>NoteModel.fromMap(map)).toList();
   }
   static Future<int>updateToNote(NoteModel note)async{

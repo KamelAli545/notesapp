@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:notesapp/dataBaseHelper.dart';
+import 'package:notesapp/cubit/auth_cubit.dart';
+import 'package:notesapp/cubit/notes_cubit.dart';
 import 'package:notesapp/noteModel.dart';
-import 'package:notesapp/notes_cubit.dart';
 import 'package:notesapp/screens/editScreen.dart';
 import 'package:notesapp/screens/widgets/NoteCard.dart';
 
@@ -15,25 +15,15 @@ class Homescreen extends StatefulWidget {
 }
 
 class _HomescreenState extends State<Homescreen> {
-  List<NoteModel> notes = [
-    ];
   bool isSelecting=false;
   Set<int> selectedIds={};
   final searchController = TextEditingController();
   String searchQuery = '';
 
-
-  Future<void>loadNotes() async{
-    final result=await DatabaseHelper.getNote();
-    if(!mounted)return;
-    setState(() {
-      notes=result;
-    });
-}
   @override
   void initState() {
     super.initState();
-    loadNotes();
+    context.read<NotesCubit>().loadNotes();
     searchController.addListener(() {
       setState(() {
         searchQuery = searchController.text.trim().toLowerCase();
@@ -129,7 +119,7 @@ class _HomescreenState extends State<Homescreen> {
                 context, MaterialPageRoute
               (builder: (_)=>Editscreen()));
           },
-      backgroundColor: Color(0xFF1B2333),
+      backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
         icon: Icon(Icons.add),
         label: Text("New Note"),
@@ -140,65 +130,76 @@ class _HomescreenState extends State<Homescreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if(isSelecting)
-                    TextButton(onPressed: _cancelSelection,
-                        child: Text("Cancel",
-                        style: TextStyle(
-                          color: Color(0xFF1B2333)
-                        ),))
-                else
-                  Text("Notes",
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF1B2333),
-                ),),
-                  if (isSelecting)
-                    (selectedIds.isNotEmpty
-                        ? TextButton(
-                      onPressed: _deleteSelected,
-                      child: Text("Delete",
-                          style: TextStyle(color: Colors.red)),
-                    )
-                        : SizedBox.shrink())
-                  else if (notes.isNotEmpty)
-                    TextButton(
-                      onPressed: _enterSelectionMode,
-                      child: Text("Select",
-                          style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF1B2333))),
-                    ),
-                ],
-                ),
-                if (isSelecting)
-                  Padding(
-                    padding: EdgeInsets.only(top: 4),
-                    child: Text(
-                      '${selectedIds.length} selected',
-                      style: TextStyle(
-                        color: Color(0xFF6B7385),
-                        fontSize: 14,
-                      ),
-                    ),
-                  )
-                else
-                  Text(
-                    '${notes.length} notes',
-                    style: TextStyle(
-                      color: Color(0xFF6B7385),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                    ),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.purple,
+                    borderRadius: BorderRadius.circular(16),
                   ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (isSelecting)
+                            const Text(
+                              "Selecting",
+                              style: TextStyle(
+                                fontSize: 30,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            )
+                          else
+                            const Text(
+                              "Notes",
+                              style: TextStyle(
+                                fontSize: 30,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                          Text(
+                            isSelecting
+                                ? '${selectedIds.length} selected'
+                                : '${notes.length} notes',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (isSelecting)
+                        Row(
+                          children: [
+                            TextButton(
+                              onPressed: _cancelSelection,
+                              child: const Text("Cancel",
+                                  style: TextStyle(color: Colors.white)),
+                            ),
+                            if (selectedIds.isNotEmpty)
+                              TextButton(
+                                onPressed: _deleteSelected,
+                                child: const Text("Delete",
+                                    style: TextStyle(color: Colors.white)),
+                              ),
+                          ],
+                        )
+                      else
+                        IconButton(
+                          icon: const Icon(Icons.logout, color: Colors.white),
+                          onPressed: () => context.read<AuthCubit>().logout(),
+                        ),
+                    ],
+                  ),
+                ),
                 SizedBox(height: 20),
                 if (!isSelecting)
                   TextField(
-
                     controller: searchController,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
