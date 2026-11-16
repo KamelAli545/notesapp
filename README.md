@@ -1,16 +1,45 @@
-# notesapp
+# Notes App
 
-A new Flutter project.
+A Flutter notes app with local storage, search, and per-user notes backed by Firebase Authentication.
+
+## Screenshots
+<!-- Add screenshots or a demo GIF here -->
+
+## Features
+- Create, edit, and delete notes
+- Home screen grid view
+- Search notes
+- Multi-select delete
+- Email/password sign-up and login (Firebase Auth)
+- Each user sees only their own notes
+- Purple UI with a Lottie splash screen
+
+## Tech Stack
+- Flutter & Dart
+- flutter_bloc (Cubit)
+- SQLite (local database)
+- Firebase Authentication
+- Lottie
 
 ## Getting Started
+1. Clone the repo:
+   ```bash
+   git clone https://github.com/KamelAli545/notesapp.git
+   ```
+2. Install dependencies:
+   ```bash
+   flutter pub get
+   ```
+3. Set up Firebase:
+   - Create a Firebase project and enable Email/Password sign-in.
+   - Add your app with `flutterfire configure` or place `google-services.json` in `android/app/`.
+4. Run the app:
+   ```bash
+   flutter run
+   ```
 
-This project is a starting point for a Flutter application.
+## Roadmap
+- [ ] Sync notes to Cloud Firestore
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Author
+Kamel Ali Kamel · [LinkedIn](https://linkedin.com/in/kamel-ali03) · [GitHub](https://github.com/KamelAli545)
