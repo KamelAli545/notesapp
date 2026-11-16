@@ -3,8 +3,7 @@
 A Flutter notes app with local storage, search, and per-user notes backed by Firebase Authentication.
 
 ## Screenshots
-<!-- Add screenshots or a demo GIF here -->
-
+![Notes Showcase](notes_showcase_6screens_HD.png)
 ## Features
 - Create, edit, and delete notes
 - Home screen grid view
